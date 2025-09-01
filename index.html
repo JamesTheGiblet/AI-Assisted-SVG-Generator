@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SVG Generator with Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #2c3e50, #4ca1af);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .library-panel {
+            flex-basis: 100%;
+            margin-bottom: 20px;
+        }
+
+        .editor-panel {
+            flex: 1;
+        }
+
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4ca1af;
+        }
+
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            border-color: #4ca1af;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .template-category {
+            font-size: 0.8rem;
+            color: #666;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #4ca1af;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #2c3e50;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .ai-suggestions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #bbdefb;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .suggestion-item:hover {
+            background: #90caf9;
+        }
+
+        .svg-preview {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed #4ca1af;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .code-output {
+            width: 100%;
+            height: 200px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            overflow: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+
+        .ai-assist-btn {
+            background: #fdbb2d;
+            color: #333;
+        }
+
+        .ai-assist-btn:hover {
+            background: #f9a825;
+        }
+
+        .category-filter {
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            margin: 5px;
+            background: #e9ecef;
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #4ca1af;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .panel {
+                width: 100%;
+            }
+
+            .library-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI-Assisted SVG Generator</h1>
+            <p class="subtitle">Create beautiful SVG graphics with AI suggestions and template library</p>
+        </header>
+
+        <div class="main-content">
+            <div class="library-panel panel">
+                <h2 class="panel-title">SVG Template Library</h2>
+                
+                <div class="category-filter">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="icons">Icons</button>
+                    <button class="filter-btn" data-category="nature">Nature</button>
+                    <button class="filter-btn" data-category="geometric">Geometric</button>
+                    <button class="filter-btn" data-category="decorative">Decorative</button>
+                    <button class="filter-btn" data-category="logos">Logos</button>
+                </div>
+
+                <div class="library-grid" id="library-grid">
+                    <!-- Templates will be populated here -->
+                </div>
+            </div>
+
+            <div class="editor-panel panel">
+                <h2 class="panel-title">SVG Editor</h2>
+                
+                <div class="form-group">
+                    <label for="shape-type">Shape Type</label>
+                    <select id="shape-type">
+                        <option value="circle">Circle</option>
+                        <option value="rect">Rectangle</option>
+                        <option value="ellipse">Ellipse</option>
+                        <option value="line">Line</option>
+                        <option value="polygon">Polygon</option>
+                        <option value="path">Path</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fill-color">Fill Color</label>
+                    <input type="color" id="fill-color" value="#4ca1af">
+                </div>
+
+                <div class="form-group">
+                    <label for="stroke-color">Stroke Color</label>
+                    <input type="color" id="stroke-color" value="#2c3e50">
+                </div>
+
+                <div class="form-group">
+                    <label for="stroke-width">Stroke Width</label>
+                    <input type="range" id="stroke-width" min="0" max="10" value="2">
+                </div>
+
+                <div class="form-group">
+                    <label for="opacity">Opacity</label>
+                    <input type="range" id="opacity" min="0" max="1" step="0.1" value="1">
+                </div>
+
+                <div class="button-group">
+                    <button id="add-element">Add Element</button>
+                    <button id="ai-suggest" class="ai-assist-btn">Get AI Suggestions</button>
+                    <button id="clear-all">Clear All</button>
+                </div>
+
+                <div class="ai-suggestions">
+                    <h3>AI Suggestions</h3>
+                    <div id="suggestions-list">
+                        <p>Click "Get AI Suggestions" for ideas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-panel panel">
+                <h2 class="panel-title">Preview</h2>
+                
+                <div class="svg-preview" id="svg-preview">
+                    <svg id="svg-canvas" width="100%" height="100%" viewBox="0 0 300 300"></svg>
+                </div>
+
+                <div class="code-output" id="code-output">
+                    <!-- SVG code will be displayed here -->
+                </div>
+
+                <div class="button-group">
+                    <button id="export-svg">Export SVG</button>
+                    <button id="copy-code">Copy Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const svgCanvas = document.getElementById('svg-canvas');
+            const codeOutput = document.getElementById('code-output');
+            const addElementBtn = document.getElementById('add-element');
+            const aiSuggestBtn = document.getElementById('ai-suggest');
+            const clearAllBtn = document.getElementById('clear-all');
+            const exportSvgBtn = document.getElementById('export-svg');
+            const copyCodeBtn = document.getElementById('copy-code');
+            const suggestionsList = document.getElementById('suggestions-list');
+            const libraryGrid = document.getElementById('library-grid');
+            
+            // Set SVG namespace
+            svgCanvas.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            
+            // SVG Template Library
+            const svgTemplates = [
+                {
+                    name: "Heart",
+                    category: "icons",
+                    svg: `<path d="M150,250 C 150,250 50,180 50,120 C 50,80 80,50 120,50 C 135,50 150,65 150,65 C 150,65 165,50 180,50 C 220,50 250,80 250,120 C 250,180 150,250 150,250 Z" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>`
+                },
+                {
+                    name: "Star",
+                    category: "icons",
+                    svg: `<polygon points="150,20 175,100 250,100 190,140 210,220 150,180 90,220 110,140 50,100 125,100" fill="#f1c40f" stroke="#f39c12" stroke-width="2"/>`
+                },
+                {
+                    name: "Tree",
+                    category: "nature",
+                    svg: `<rect x="140" y="200" width="20" height="80" fill="#8b4513"/>
+                           <circle cx="150" cy="180" r="50" fill="#228b22"/>
+                           <circle cx="130" cy="160" r="35" fill="#32cd32"/>
+                           <circle cx="170" cy="160" r="35" fill="#32cd32"/>`
+                },
+                {
+                    name: "Flower",
+                    category: "nature",
+                    svg: `<circle cx="150" cy="150" r="20" fill="#ffeb3b"/>
+                           <ellipse cx="150" cy="110" rx="15" ry="30" fill="#e91e63" transform="rotate(0 150 150)"/>
+                           <ellipse cx="150" cy="110" rx="15" ry="30" fill="#e91e63" transform="rotate(72 150 150)"/>
+                           <ellipse cx="150" cy="110" rx="15" ry="30" fill="#e91e63" transform="rotate(144 150 150)"/>
+                           <ellipse cx="150" cy="110" rx="15" ry="30" fill="#e91e63" transform="rotate(216 150 150)"/>
+                           <ellipse cx="150" cy="110" rx="15" ry="30" fill="#e91e63" transform="rotate(288 150 150)"/>`
+                },
+                {
+                    name: "Hexagon Pattern",
+                    category: "geometric",
+                    svg: `<polygon points="150,50 200,87.5 200,162.5 150,200 100,162.5 100,87.5" fill="#9c27b0" stroke="#7b1fa2" stroke-width="3"/>
+                           <polygon points="150,80 180,100 180,140 150,160 120,140 120,100" fill="#e1bee7" stroke="#ad1457" stroke-width="2"/>`
+                },
+                {
+                    name: "Triangle Mosaic",
+                    category: "geometric",
+                    svg: `<polygon points="150,50 100,150 200,150" fill="#2196f3" opacity="0.8"/>
+                           <polygon points="100,150 50,250 150,250" fill="#03a9f4" opacity="0.8"/>
+                           <polygon points="200,150 150,250 250,250" fill="#00bcd4" opacity="0.8"/>
+                           <polygon points="150,50 200,150 100,150" fill="#0097a7" opacity="0.6"/>`
+                },
+                {
+                    name: "Mandala",
+                    category: "decorative",
+                    svg: `<circle cx="150" cy="150" r="100" fill="none" stroke="#673ab7" stroke-width="2"/>
+                           <circle cx="150" cy="150" r="80" fill="none" stroke="#9c27b0" stroke-width="2"/>
+                           <circle cx="150" cy="150" r="60" fill="none" stroke="#e91e63" stroke-width="2"/>
+                           <circle cx="150" cy="150" r="40" fill="none" stroke="#ff5722" stroke-width="2"/>
+                           <circle cx="150" cy="150" r="20" fill="#ff9800"/>
+                           <circle cx="150" cy="50" r="8" fill="#673ab7"/>
+                           <circle cx="250" cy="150" r="8" fill="#673ab7"/>
+                           <circle cx="150" cy="250" r="8" fill="#673ab7"/>
+                           <circle cx="50" cy="150" r="8" fill="#673ab7"/>`
+                },
+                {
+                    name: "Celtic Knot",
+                    category: "decorative",
+                    svg: `<path d="M75,75 Q150,25 225,75 Q275,150 225,225 Q150,275 75,225 Q25,150 75,75 Z" fill="none" stroke="#4caf50" stroke-width="8"/>
+                           <path d="M75,225 Q150,175 225,225 Q275,150 225,75 Q150,25 75,75 Q25,150 75,225 Z" fill="none" stroke="#8bc34a" stroke-width="6"/>`
+                },
+                {
+                    name: "Sun",
+                    category: "nature",
+                    svg: `<circle cx="150" cy="150" r="40" fill="#ff9800"/>
+                           <line x1="150" y1="50" x2="150" y2="80" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="220" y1="80" x2="200" y2="100" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="250" y1="150" x2="220" y2="150" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="220" y1="220" x2="200" y2="200" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="150" y1="250" x2="150" y2="220" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="80" y1="220" x2="100" y2="200" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="50" y1="150" x2="80" y2="150" stroke="#ff9800" stroke-width="4"/>
+                           <line x1="80" y1="80" x2="100" y2="100" stroke="#ff9800" stroke-width="4"/>`
+                },
+                {
+                    name: "Mountain Range",
+                    category: "nature",
+                    svg: `<polygon points="50,250 100,150 150,200 200,100 250,180 300,250" fill="#607d8b" stroke="#455a64" stroke-width="2"/>
+                           <polygon points="50,250 80,200 120,220 160,170 200,190 250,250" fill="#78909c" opacity="0.8"/>
+                           <circle cx="80" cy="80" r="25" fill="#ffeb3b" opacity="0.9"/>`
+                },
+                {
+                    name: "Tech Logo",
+                    category: "logos",
+                    svg: `<rect x="75" y="75" width="150" height="150" rx="20" fill="#2196f3"/>
+                           <rect x="100" y="100" width="100" height="100" rx="10" fill="#fff"/>
+                           <circle cx="150" cy="150" r="30" fill="#2196f3"/>
+                           <rect x="140" y="140" width="20" height="20" fill="#fff"/>`
+                },
+                {
+                    name: "Abstract Logo",
+                    category: "logos",
+                    svg: `<circle cx="150" cy="150" r="80" fill="none" stroke="#9c27b0" stroke-width="8"/>
+                           <path d="M110,150 Q150,100 190,150 Q150,200 110,150" fill="#e91e63"/>
+                           <circle cx="150" cy="150" r="15" fill="#fff"/>`
+                },
+                {
+                    name: "Arrow",
+                    category: "icons",
+                    svg: `<polygon points="50,150 150,100 150,130 250,130 250,170 150,170 150,200" fill="#4caf50" stroke="#388e3c" stroke-width="2"/>`
+                },
+                {
+                    name: "Lightning",
+                    category: "icons",
+                    svg: `<polygon points="120,50 180,120 150,120 180,250 120,180 150,180" fill="#ffeb3b" stroke="#ffc107" stroke-width="2"/>`
+                },
+                {
+                    name: "Butterfly",
+                    category: "nature",
+                    svg: `<ellipse cx="130" cy="120" rx="25" ry="40" fill="#e91e63" opacity="0.8"/>
+                           <ellipse cx="170" cy="120" rx="25" ry="40" fill="#e91e63" opacity="0.8"/>
+                           <ellipse cx="130" cy="180" rx="20" ry="30" fill="#9c27b0" opacity="0.8"/>
+                           <ellipse cx="170" cy="180" rx="20" ry="30" fill="#9c27b0" opacity="0.8"/>
+                           <line x1="150" y1="80" x2="150" y2="220" stroke="#333" stroke-width="3"/>
+                           <circle cx="150" cy="85" r="5" fill="#333"/>`
+                },
+                {
+                    name: "Diamond Grid",
+                    category: "geometric",
+                    svg: `<polygon points="150,75 200,125 150,175 100,125" fill="#00bcd4" opacity="0.7"/>
+                           <polygon points="100,125 150,175 100,225 50,175" fill="#009688" opacity="0.7"/>
+                           <polygon points="200,125 250,175 200,225 150,175" fill="#4db6ac" opacity="0.7"/>
+                           <polygon points="150,175 200,225 150,275 100,225" fill="#26a69a" opacity="0.7"/>`
+                },
+                {
+                    name: "Spiral",
+                    category: "decorative",
+                    svg: `<path d="M150,150 Q200,150 200,100 Q200,50 150,50 Q100,50 100,100 Q100,150 150,150 Q200,150 220,120 Q240,90 220,60 Q200,30 150,30 Q100,30 70,60 Q40,90 60,120 Q80,150 150,150" fill="none" stroke="#673ab7" stroke-width="4"/>`
+                },
+                {
+                    name: "Gear",
+                    category: "icons",
+                    svg: `<circle cx="150" cy="150" r="60" fill="#607d8b"/>
+                           <circle cx="150" cy="150" r="25" fill="#fff"/>
+                           <rect x="145" y="80" width="10" height="20" fill="#607d8b"/>
+                           <rect x="145" y="200" width="10" height="20" fill="#607d8b"/>
+                           <rect x="200" y="145" width="20" height="10" fill="#607d8b"/>
+                           <rect x="80" y="145" width="20" height="10" fill="#607d8b"/>
+                           <rect x="185" y="100" width="15" height="15" fill="#607d8b" transform="rotate(45 150 150)"/>
+                           <rect x="100" y="185" width="15" height="15" fill="#607d8b" transform="rotate(45 150 150)"/>
+                           <rect x="185" y="185" width="15" height="15" fill="#607d8b" transform="rotate(45 150 150)"/>
+                           <rect x="100" y="100" width="15" height="15" fill="#607d8b" transform="rotate(45 150 150)"/>`
+                },
+                {
+                    name: "Wave Pattern",
+                    category: "decorative",
+                    svg: `<path d="M0,150 Q75,100 150,150 Q225,200 300,150" fill="none" stroke="#00bcd4" stroke-width="8"/>
+                           <path d="M0,170 Q75,120 150,170 Q225,220 300,170" fill="none" stroke="#4dd0e1" stroke-width="6"/>
+                           <path d="M0,190 Q75,140 150,190 Q225,240 300,190" fill="none" stroke="#80deea" stroke-width="4"/>`
+                },
+                {
+                    name: "House",
+                    category: "icons",
+                    svg: `<polygon points="150,80 220,150 80,150" fill="#f44336"/>
+                           <rect x="100" y="150" width="100" height="80" fill="#795548"/>
+                           <rect x="120" y="170" width="25" height="40" fill="#5d4037"/>
+                           <rect x="155" y="170" width="25" height="25" fill="#81c784"/>`
+                },
+                {
+                    name: "Infinity",
+                    category: "geometric",
+                    svg: `<path d="M70,150 Q100,100 150,150 Q200,200 250,150 Q220,100 170,150 Q120,200 70,150" fill="none" stroke="#9c27b0" stroke-width="8"/>`
+                },
+                {
+                    name: "Shield",
+                    category: "icons",
+                    svg: `<path d="M150,50 Q200,70 230,120 L230,180 Q230,220 150,250 Q70,220 70,180 L70,120 Q100,70 150,50" fill="#4caf50" stroke="#388e3c" stroke-width="3"/>
+                           <path d="M120,130 L140,150 L180,110" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>`
+                },
+                {
+                    name: "Rocket",
+                    category: "icons",
+                    svg: `<ellipse cx="150" cy="120" rx="20" ry="60" fill="#ff5722"/>
+                           <polygon points="130,180 150,220 170,180" fill="#ff9800"/>
+                           <circle cx="150" cy="110" r="8" fill="#fff"/>
+                           <polygon points="130,100 120,120 140,120" fill="#e53935"/>
+                           <polygon points="170,100 180,120 160,120" fill="#e53935"/>`
+                },
+                {
+                    name: "Cloud",
+                    category: "nature",
+                    svg: `<circle cx="100" cy="150" r="30" fill="#e0e0e0"/>
+                           <circle cx="130" cy="140" r="35" fill="#e0e0e0"/>
+                           <circle cx="170" cy="140" r="35" fill="#e0e0e0"/>
+                           <circle cx="200" cy="150" r="30" fill="#e0e0e0"/>
+                           <rect x="100" y="150" width="100" height="30" fill="#e0e0e0"/>`
+                },
+                {
+                    name: "Music Note",
+                    category: "icons",
+                    svg: `<circle cx="120" cy="200" r="20" fill="#333"/>
+                           <rect x="135" y="100" width="4" height="100" fill="#333"/>
+                           <circle cx="170" cy="180" r="15" fill="#333"/>
+                           <rect x="182" y="120" width="3" height="60" fill="#333"/>
+                           <path d="M139,100 Q170,80 185,120" fill="none" stroke="#333" stroke-width="3"/>`
+                },
+                {
+                    name: "Circular Logo",
+                    category: "logos",
+                    svg: `<circle cx="150" cy="150" r="90" fill="#2196f3"/>
+                           <circle cx="150" cy="150" r="70" fill="none" stroke="#fff" stroke-width="4"/>
+                           <text x="150" y="160" text-anchor="middle" fill="#fff" font-size="40" font-weight="bold">AI</text>`
+                },
+                {
+                    name: "Snowflake",
+                    category: "decorative",
+                    svg: `<line x1="150" y1="75" x2="150" y2="225" stroke="#00bcd4" stroke-width="3"/>
+                           <line x1="215" y1="112.5" x2="85" y2="187.5" stroke="#00bcd4" stroke-width="3"/>
+                           <line x1="215" y1="187.5" x2="85" y2="112.5" stroke="#00bcd4" stroke-width="3"/>
+                           <circle cx="150" cy="75" r="5" fill="#00bcd4"/>
+                           <circle cx="150" cy="225" r="5" fill="#00bcd4"/>
+                           <circle cx="215" cy="112.5" r="5" fill="#00bcd4"/>
+                           <circle cx="85" cy="187.5" r="5" fill="#00bcd4"/>
+                           <circle cx="215" cy="187.5" r="5" fill="#00bcd4"/>
+                           <circle cx="85" cy="112.5" r="5" fill="#00bcd4"/>`
+                },
+                {
+                    name: "Compass",
+                    category: "icons",
+                    svg: `<circle cx="150" cy="150" r="80" fill="none" stroke="#795548" stroke-width="4"/>
+                           <polygon points="150,80 160,140 150,160 140,140" fill="#f44336"/>
+                           <polygon points="150,220 160,160 150,140 140,160" fill="#333"/>
+                           <text x="150" y="75" text-anchor="middle" font-size="16" font-weight="bold">N</text>
+                           <text x="235" y="160" text-anchor="middle" font-size="16" font-weight="bold">E</text>
+                           <text x="150" y="240" text-anchor="middle" font-size="16" font-weight="bold">S</text>
+                           <text x="65" y="160" text-anchor="middle" font-size="16" font-weight="bold">W</text>`
+                }
+            ];
+
+            // AI suggestions database
+            const aiSuggestions = {
+                circle: [
+                    "Create a gradient-filled circle with a thick stroke",
+                    "Make multiple concentric circles with alternating colors",
+                    "Create a circle with a pattern fill"
+                ],
+                rect: [
+                    "Create a rectangle with rounded corners and shadow effect",
+                    "Make a grid of rectangles with alternating colors",
+                    "Create a rectangle with gradient that changes on hover"
+                ],
+                ellipse: [
+                    "Create a series of ellipses with different opacities",
+                    "Make an ellipse with a radial gradient",
+                    "Create an elliptical pattern that resembles eyes"
+                ],
+                line: [
+                    "Create a cross pattern with intersecting lines",
+                    "Make a series of parallel lines with varying stroke widths",
+                    "Create a star pattern using lines"
+                ],
+                polygon: [
+                    "Create a star shape with gradient fill",
+                    "Make a hexagon pattern",
+                    "Create an abstract geometric shape with multiple points"
+                ],
+                path: [
+                    "Create a simple heart shape",
+                    "Make a wavy line pattern",
+                    "Create a custom geometric pattern"
+                ]
+            };
+
+            // Initialize template library
+            function initializeLibrary() {
+                populateTemplates('all');
+                setupCategoryFilters();
+            }
+
+            // Populate templates based on category
+            function populateTemplates(category) {
+                libraryGrid.innerHTML = '';
+                
+                const filteredTemplates = category === 'all' 
+                    ? svgTemplates 
+                    : svgTemplates.filter(template => template.category === category);
+
+                filteredTemplates.forEach(template => {
+                    const templateCard = document.createElement('div');
+                    templateCard.classList.add('template-card');
+                    
+                    templateCard.innerHTML = `
+                        <div class="template-preview">
+                            <svg width="100%" height="100%" viewBox="0 0 300 300">
+                                ${template.svg}
+                            </svg>
+                        </div>
+                        <div class="template-name">${template.name}</div>
+                        <div class="template-category">${template.category}</div>
+                    `;
+                    
+                    templateCard.addEventListener('click', () => loadTemplate(template));
+                    libraryGrid.appendChild(templateCard);
+                });
+            }
+
+            // Load template into canvas
+            function loadTemplate(template) {
+                svgCanvas.innerHTML = template.svg;
+                updateCodeOutput();
+            }
+
+            // Setup category filters
+            function setupCategoryFilters() {
+                const filterBtns = document.querySelectorAll('.filter-btn');
+                
+                filterBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Remove active class from all buttons
+                        filterBtns.forEach(b => b.classList.remove('active'));
+                        // Add active class to clicked button
+                        btn.classList.add('active');
+                        // Filter templates
+                        populateTemplates(btn.dataset.category);
+                    });
+                });
+            }
+            
+            // Add element to SVG
+            addElementBtn.addEventListener('click', function() {
+                const shapeType = document.getElementById('shape-type').value;
+                const fillColor = document.getElementById('fill-color').value;
+                const strokeColor = document.getElementById('stroke-color').value;
+                const strokeWidth = document.getElementById('stroke-width').value;
+                const opacity = document.getElementById('opacity').value;
+                
+                let newElement;
+                
+                switch(shapeType) {
+                    case 'circle':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        newElement.setAttribute('cx', '150');
+                        newElement.setAttribute('cy', '150');
+                        newElement.setAttribute('r', '50');
+                        break;
+                    case 'rect':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        newElement.setAttribute('x', '100');
+                        newElement.setAttribute('y', '100');
+                        newElement.setAttribute('width', '100');
+                        newElement.setAttribute('height', '100');
+                        break;
+                    case 'ellipse':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+                        newElement.setAttribute('cx', '150');
+                        newElement.setAttribute('cy', '150');
+                        newElement.setAttribute('rx', '70');
+                        newElement.setAttribute('ry', '40');
+                        break;
+                    case 'line':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        newElement.setAttribute('x1', '100');
+                        newElement.setAttribute('y1', '100');
+                        newElement.setAttribute('x2', '200');
+                        newElement.setAttribute('y2', '200');
+                        break;
+                    case 'polygon':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        newElement.setAttribute('points', '150,50 100,150 200,150');
+                        break;
+                    case 'path':
+                        newElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        newElement.setAttribute('d', 'M100 100 C 150 50, 200 50, 250 100');
+                        break;
+                }
+                
+                // Set common attributes
+                newElement.setAttribute('fill', fillColor);
+                newElement.setAttribute('stroke', strokeColor);
+                newElement.setAttribute('stroke-width', strokeWidth);
+                newElement.setAttribute('opacity', opacity);
+                
+                // Add to SVG canvas
+                svgCanvas.appendChild(newElement);
+                
+                // Update code output
+                updateCodeOutput();
+            });
+            
+            // Get AI suggestions
+            aiSuggestBtn.addEventListener('click', function() {
+                const shapeType = document.getElementById('shape-type').value;
+                const suggestions = aiSuggestions[shapeType];
+                
+                // Clear previous suggestions
+                suggestionsList.innerHTML = '';
+                
+                // Add new suggestions
+                suggestions.forEach(suggestion => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.classList.add('suggestion-item');
+                    suggestionItem.textContent = suggestion;
+                    
+                    // Add click event to apply suggestion
+                    suggestionItem.addEventListener('click', function() {
+                        applySuggestion(shapeType, suggestion);
+                    });
+                    
+                    suggestionsList.appendChild(suggestionItem);
+                });
+            });
+            
+            // Apply AI suggestion
+            function applySuggestion(shapeType, suggestion) {
+                // Enhanced suggestion application with more sophisticated logic
+                if (suggestion.includes('gradient')) {
+                    applyGradientSuggestion();
+                } else if (suggestion.includes('multiple') || suggestion.includes('concentric')) {
+                    applyMultipleSuggestion(shapeType);
+                } else if (suggestion.includes('pattern')) {
+                    applyPatternSuggestion(shapeType);
+                } else {
+                    // Default random property changes
+                    document.getElementById('fill-color').value = getRandomColor();
+                    document.getElementById('stroke-color').value = getRandomColor();
+                    document.getElementById('stroke-width').value = Math.floor(Math.random() * 6) + 2;
+                    document.getElementById('opacity').value = (Math.random() * 0.5 + 0.5).toFixed(1);
+                }
+            }
+
+            function applyGradientSuggestion() {
+                // Create a gradient definition
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                gradient.setAttribute('id', 'grad' + Date.now());
+                
+                const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop1.setAttribute('offset', '0%');
+                stop1.setAttribute('stop-color', getRandomColor());
+                
+                const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop2.setAttribute('offset', '100%');
+                stop2.setAttribute('stop-color', getRandomColor());
+                
+                gradient.appendChild(stop1);
+                gradient.appendChild(stop2);
+                defs.appendChild(gradient);
+                svgCanvas.appendChild(defs);
+                
+                document.getElementById('fill-color').value = `url(#${gradient.id})`;
+            }
+
+            function applyMultipleSuggestion(shapeType) {
+                const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        document.getElementById('fill-color').value = colors[i % colors.length];
+                        document.getElementById('stroke-width').value = i + 1;
+                        document.getElementById('opacity').value = (1 - i * 0.2).toFixed(1);
+                        addElementBtn.click();
+                    }, i * 200);
+                }
+            }
+
+            function applyPatternSuggestion(shapeType) {
+                // Apply pattern-like properties
+                document.getElementById('stroke-width').value = '3';
+                document.getElementById('opacity').value = '0.8';
+                document.getElementById('fill-color').value = getRandomColor();
+                document.getElementById('stroke-color').value = getRandomColor();
+            }
+            
+            // Clear all elements
+            clearAllBtn.addEventListener('click', function() {
+                svgCanvas.innerHTML = '';
+                updateCodeOutput();
+            });
+            
+            // Export SVG
+            exportSvgBtn.addEventListener('click', function() {
+                const svgData = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(svgCanvas)}`;
+                const blob = new Blob([svgData], {type: 'image/svg+xml'});
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai-generated-svg.svg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // Copy code to clipboard
+            copyCodeBtn.addEventListener('click', function() {
+                const code = new XMLSerializer().serializeToString(svgCanvas);
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('SVG code copied to clipboard!');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('SVG code copied to clipboard!');
+                });
+            });
+            
+            // Update code output
+            function updateCodeOutput() {
+                const svgCode = new XMLSerializer().serializeToString(svgCanvas);
+                codeOutput.textContent = svgCode;
+            }
+            
+            // Helper function to generate random color
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+            
+            // Initialize the application
+            initializeLibrary();
+            
+            // Initialize with a sample element
+            const sampleCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            sampleCircle.setAttribute('cx', '150');
+            sampleCircle.setAttribute('cy', '150');
+            sampleCircle.setAttribute('r', '50');
+            sampleCircle.setAttribute('fill', '#4ca1af');
+            sampleCircle.setAttribute('stroke', '#2c3e50');
+            sampleCircle.setAttribute('stroke-width', '2');
+            svgCanvas.appendChild(sampleCircle);
+            updateCodeOutput();
+        });
+    </script>
+</body>
+</html>
